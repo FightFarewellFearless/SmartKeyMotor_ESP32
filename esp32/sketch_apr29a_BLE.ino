@@ -15,7 +15,6 @@
 #define TIMEBYPASS_CHARACTERISTIC_UUID "cb9483dd-5216-4c36-9a88-9bda52865574"
 
 uint32_t passkey = 308081;
-
 const int RELAY_PIN = 27;
 
 std::optional<String> currentChallenge;
@@ -35,11 +34,11 @@ String generateRandomString(int length) {
   }
   return result;
 }
+
 String calculateSHA256(String input) {
   mbedtls_md_context_t ctx;
   mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
   byte shaResult[32];
-
   mbedtls_md_init(&ctx);
   mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 0);
   mbedtls_md_starts(&ctx);
@@ -58,7 +57,8 @@ String calculateSHA256(String input) {
 
 class MySecurity : public BLESecurityCallbacks {
   uint32_t onPassKeyRequest() {
-    return passkey;  // This is your static PIN
+    return passkey;
+    // This is your static PIN
   }
   void onPassKeyNotify(uint32_t pass_key) {}
   bool onConfirmPIN(uint32_t pass_key) {
@@ -75,7 +75,6 @@ class MySecurity : public BLESecurityCallbacks {
 //   void onConnect(BLEServer *pServer) {
 //     pServer->requestConnParams(uint8_t *remote_bda, uint16_t minInterval, uint16_t maxInterval, uint16_t latency, uint16_t timeout)
 //   };
-
 //   void onDisconnect(BLEServer *pServer) {
 //     BLEDevice::startAdvertising();
 //   }
@@ -86,17 +85,16 @@ BLECharacteristic *pEngineCharacteristic = nullptr;
 bool isEngineOn() {
   return digitalRead(RELAY_PIN) == LOW;
 }
+
 void setEngineIsOn(bool isItOn) {
   if (isEngineOn() != isItOn) {
     digitalWrite(RELAY_PIN, isItOn ? LOW : HIGH);
-
     if (pEngineCharacteristic != nullptr) {
       pEngineCharacteristic->setValue(isItOn ? "true" : "false");
       pEngineCharacteristic->notify();
     }
   }
 }
-
 
 class EngineCharacteristicsCallbacks : public BLECharacteristicCallbacks {
   void onRead(BLECharacteristic *pEngineCharacteristic) {
@@ -132,7 +130,6 @@ class ChallengeCharacteristicsCallbacks : public BLECharacteristicCallbacks {
       String challenge;
       String nonce;
       int splitIndex = value.indexOf('|');
-
       if (splitIndex != -1) {
         challenge = value.substring(0, splitIndex);
         nonce = value.substring(splitIndex + 1);
@@ -187,12 +184,16 @@ class TimeBypassCharacteristicsCallbacks : public BLECharacteristicCallbacks {
   }
 };
 
-
 void setup() {
+  Serial.begin(115200);
+  Serial.println("Mempersiapkan sistem...");
+
   if (!rtc.begin()) {
     isRTCConnected = false;
+    Serial.println("RTC tidak terdeteksi!");
   } else {
     isRTCConnected = true;
+    Serial.println("RTC terhubung.");
   }
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, HIGH);
@@ -200,13 +201,15 @@ void setup() {
   BLEDevice::init("K_MTR");
   BLEDevice::setMTU(120);
 
-  BLEDevice::setSecurityCallbacks(new MySecurity());
+  // Menampilkan MAC Address ke Serial Monitor
+  Serial.print("Alamat MAC BLE Perangkat (Copy ke App.tsx): ");
+  Serial.println(BLEDevice::getAddress().toString().c_str());
 
+  BLEDevice::setSecurityCallbacks(new MySecurity());
   BLEServer *pServer = BLEDevice::createServer();
   // pServer->setCallbacks(new MyServerCallbacks());
   pServer->advertiseOnDisconnect(true);
   BLEService *pService = pServer->createService(SERVICE_UUID);
-
   pEngineCharacteristic = pService->createCharacteristic(
     ENGINE_SEND_CHARACTERISTIC_UUID,
     BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
@@ -219,7 +222,6 @@ void setup() {
   BLECharacteristic *pChallengeCharacteristic = pService->createCharacteristic(
     CHALLENGE_CHARACTERISTIC_UUID,
     BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-
   pChallengeCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
   pChallengeCharacteristic->setCallbacks(new ChallengeCharacteristicsCallbacks());
   pChallengeCharacteristic->setValue("Challenge");
@@ -240,7 +242,8 @@ void setup() {
   pAdvertising->setMaxInterval(0x40);
 
   pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06);  // Bantu koneksi iPhone
+  pAdvertising->setMinPreferred(0x06);
+  // Bantu koneksi iPhone
   pAdvertising->setMaxPreferred(0x12);
   
   pAdvertising->start();
@@ -251,7 +254,6 @@ void setup() {
   pSecurity->setInitEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
 
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_STATIC_PASSKEY, &passkey, sizeof(uint32_t));
-
   preferences.begin("timebypass", true);
   if (isRTCConnected) {
     uint32_t savedTime = strtoul(preferences.getString("timebypass", "0").c_str(), NULL, 10);
@@ -260,19 +262,18 @@ void setup() {
     }
   }
   preferences.end();
+  
+  Serial.println("Bluetooth Siap! Menunggu Koneksi...");
 }
 
 void loop() {
   static unsigned long lastCheck = 0;
-
   if (millis() - lastCheck > 3000) {
     lastCheck = millis();
-
     if (isRTCConnected) {
       preferences.begin("timebypass", true);
       uint32_t savedTime = strtoul(preferences.getString("timebypass", "0").c_str(), NULL, 10);
       preferences.end();
-
       uint32_t currentTime = rtc.now().unixtime();
 
       if (savedTime > 0 && currentTime >= savedTime) {
