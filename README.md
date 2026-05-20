@@ -188,7 +188,7 @@ Ganti kode UUID bawaan pada baris paling atas dengan hasil generator Anda:
 * **Ganti Static Passkey (PIN Pairing):**
 Ubah kode PIN 6 digit berikut dengan PIN pilihan Anda sendiri. PIN ini wajib diinput saat HP Anda pertama kali melakukan enkripsi/bonding Bluetooth dengan motor Anda.
 ```cpp
-uint32_t passkey = 308081; // GANTI dengan 6 digit angka rahasia Anda sendiri!
+uint32_t passkey = 123456; // GANTI dengan 6 digit angka rahasia Anda sendiri!
 
 ```
 

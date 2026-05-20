@@ -3,13 +3,13 @@ import Crypto from 'react-native-quick-crypto';
 import BleManager from 'react-native-ble-manager';
 
 export const MAC_ADDRESS = 'b0:cb:d8:e8:6d:5a'.toUpperCase();
-export const SERVICE_UUID = '7d8eccd3-aaea-40ae-a1c7-6a2f8ac051b6';
+export const SERVICE_UUID = '9cae3fec-f446-4ebe-8e4f-6bc5e1b91416';
 export const SEND_ENGINE_CHARACTERISTIC_UUID =
-  '6fcf5039-b8ff-4485-8cea-eedf7da298ef';
+  '9f0d261f-98c4-467b-a42f-8603eb27ec43';
 export const CHALLENGE_CHARACTERISTIC_UUID =
-  '36ccb7b1-382f-4f88-a1fa-ae6e10f84032';
+  'e8146e19-5a33-44f7-8b70-610ae54e816b';
 export const TIMEBYPASS_CHARACTERISTIC_UUID =
-  'cb9483dd-5216-4c36-9a88-9bda52865574';
+  '61bdaa99-df7e-427c-b3fe-151e82abbd04';
 
 export const stringToBytes = (string: string) => {
   return Array.from(string).map(c => c.charCodeAt(0));

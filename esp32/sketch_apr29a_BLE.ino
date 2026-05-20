@@ -9,12 +9,12 @@
 
 #include <optional>
 
-#define SERVICE_UUID "7d8eccd3-aaea-40ae-a1c7-6a2f8ac051b6"
-#define ENGINE_SEND_CHARACTERISTIC_UUID "6fcf5039-b8ff-4485-8cea-eedf7da298ef"
-#define CHALLENGE_CHARACTERISTIC_UUID "36ccb7b1-382f-4f88-a1fa-ae6e10f84032"
-#define TIMEBYPASS_CHARACTERISTIC_UUID "cb9483dd-5216-4c36-9a88-9bda52865574"
+#define SERVICE_UUID "9cae3fec-f446-4ebe-8e4f-6bc5e1b91416"
+#define ENGINE_SEND_CHARACTERISTIC_UUID "9f0d261f-98c4-467b-a42f-8603eb27ec43"
+#define CHALLENGE_CHARACTERISTIC_UUID "e8146e19-5a33-44f7-8b70-610ae54e816b"
+#define TIMEBYPASS_CHARACTERISTIC_UUID "61bdaa99-df7e-427c-b3fe-151e82abbd04"
 
-uint32_t passkey = 308081;
+uint32_t passkey = 123456;
 const int RELAY_PIN = 27;
 
 std::optional<String> currentChallenge;
